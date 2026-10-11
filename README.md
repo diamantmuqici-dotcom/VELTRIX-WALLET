@@ -42,7 +42,7 @@ The APK was built and **statically verified** in this repository's environment (
 - **FX converter** — USD, EUR, GBP, CHF, JPY, CAD, AUD, ALL, TRY (+7 more), swap, rate and timestamp, favourite pairs, history, optional fee; bundled **demo** rates offline, optional **indicative** live rates (ExchangeRate-API, opt-in). Simulated conversions update FX accounts with a full calculation breakdown.
 - **Markets simulator** — FX pairs, indices, stocks, gold/silver and crypto with clearly labelled **demo prices**; search, watchlist, line/candle charts (1D–5Y), buy/sell with hypothetical fees, review & confirm, positions with average cost, realized/unrealized P&L and order history.
 - **Analytics** — income, spending, net, averages, largest entries, category/account/card breakdowns, daily/weekly/monthly trends, like-for-like previous-period comparison and custom ranges — computed from the local ledger only, with empty states.
-- **Extras** — setup wizard with five presets (Minimal, Everyday Banking, Premium, Investor Demo, Empty Sandbox), savings goals, budgets, subscriptions and scheduled transfers, bill reminders, global search, CSV export, validated backup/restore, app lock (device credential), reset demo, light/dark/system themes with themed system bars, six accents and adjustable motion.
+- **Extras** — setup wizard with five presets (Minimal, Everyday Banking, Premium, Investor Demo, Empty Sandbox), savings goals, budgets, subscriptions and scheduled transfers, bill reminders, global search, a decimal-exact calculator, CSV export, validated backup/restore, app lock (device credential), reset demo, light/dark/system themes with themed system bars, six accents and adjustable motion.
 
 ## Safety & privacy by design
 
@@ -74,7 +74,7 @@ tools/build-apk.sh         # tests → bundle → compile → dex → align → 
 cd tools/ui-test && npm ci && npm test          # or: npm run test:shots (refreshes docs/screenshots)
 ```
 
-**Android Studio / Gradle:** `android/` is also a standard Gradle project (AGP 8.7.3, Gradle 8.10.2 wrapper, JDK 17). Build the web bundle first (`cd app && npm ci && npm run build`), then open `android/` in Android Studio or run `./gradlew assembleDebug`. Gradle could not be executed in the environment this was developed in (Maven/Google repositories are blocked there); the GitHub Actions workflow runs it on every push.
+**Android Studio / Gradle:** `android/` is also a standard Gradle project (AGP 8.7.3, Gradle 8.10.2 wrapper, JDK 17). Build the web bundle first (`cd app && npm ci && npm run build`), then open `android/` in Android Studio or run `./gradlew assembleDebug`. Gradle could not be executed in the environment this was developed in (Maven/Google repositories are blocked there); the GitHub Actions workflow runs it on every push, and the [first run](https://github.com/diamantmuqici-dotcom/VELTRIX-WALLET/actions/runs/38177537425) built the debug APK successfully.
 
 To sign with your own key: `VELTRIX_KEYSTORE=… VELTRIX_KEY_ALIAS=… VELTRIX_STORE_PASS=… VELTRIX_KEY_PASS=… tools/build-apk.sh`.
 
@@ -122,9 +122,10 @@ The Android shell uses only Android platform APIs (no third-party Java libraries
 
 Latest run (2026-10-11):
 
-- **Unit & property tests:** 108 / 108 passed across 9 files: money parsing and formatting, payments, credit, cards, contacts, FX, markets and portfolio maths, presets, analytics, search and filters, CSV, backup/schema validation, planning. Property tests run random sequences of up to 40 operations through the ledger (300 runs) and check that balances always equal the sum of ledger effects, asset accounts never go negative, credit stays within its limit and transfers conserve value.
+- **Unit & property tests:** 114 / 114 passed across 10 files: money parsing and formatting, payments, credit, cards, contacts, FX, markets and portfolio maths, presets, analytics, search and filters, CSV, backup/schema validation, planning, calculator. Property tests run random sequences of up to 40 operations through the ledger (300 runs) and check that balances always equal the sum of ledger effects, asset accounts never go negative, credit stays within its limit and transfers conserve value.
 - **End-to-end UI tests:** 19 / 19 passed against the production bundle with its CSP: setup wizard, send/refund/request/receive, balance edits, card studio, exchange, markets, ledger search/sort, CSV and backup round-trip, persistence and corruption recovery, back navigation, theming, the native-bridge contract, a 20,000-entry history (validate ≈ 0.1 s, apply ≈ 0.4 s, Activity ≈ 0.5 s), accessibility smoke checks and zero console errors or CSP violations.
 - **APK verification:** apksigner verify (v2 + v3), `zipalign -c -p 4`, `aapt2 dump badging` (package, SDK levels, single permission, launcher activity, widget), uncompressed `resources.arsc`, dex header check.
+- **CI on a clean GitHub runner** ([run](https://github.com/diamantmuqici-dotcom/VELTRIX-WALLET/actions/runs/38177537425)): unit tests, the toolchain APK build from scratch, the end-to-end UI tests and the Gradle build all passed.
 
 Details: [docs/TESTING.md](docs/TESTING.md) · Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
@@ -134,7 +135,7 @@ This project was built in a sandbox with no Android emulator (no KVM) and with G
 
 1. **The APK has not been launched on a device or emulator here.** It is verified statically, and the web layer it hosts passes the end-to-end tests in Chromium, including a contract test of the JavaScript bridge against a mock with the same interface as `WebAppBridge.java`. On-device behaviour (WebView rendering, insets/keyboard, back gesture, file pickers, share sheet, app lock, widget) still needs a manual pass — see the checklist in [docs/TESTING.md](docs/TESTING.md).
 2. **Framework choice.** Kotlin + Jetpack Compose (and Flutter or React Native) need Gradle and Maven artifacts that could not be downloaded here, so the app uses a native Java shell with a React UI in a WebView, built with the Android SDK's own tools. This is the one framework in the repository; there are no parallel half-built implementations.
-3. **The Gradle build was not executed locally** (Maven blocked). It is configured conventionally and runs in CI.
+3. **The Gradle build was not executed locally** (Maven blocked). It runs in CI, where it [passes](https://github.com/diamantmuqici-dotcom/VELTRIX-WALLET/actions/runs/38177537425); the resulting artifact could not be downloaded into this sandbox for inspection.
 4. **Live indicative FX rates could not be fetched from this sandbox** (outbound host blocked). The parsing, validation, staleness and disclosure logic is unit-tested with sample payloads; the app falls back to labelled demo rates.
 5. **No Google/Apple Wallet provisioning** — it is not possible for fictional cards and is not claimed. The home-screen widget and in-app presentation mode are the alternatives.
 

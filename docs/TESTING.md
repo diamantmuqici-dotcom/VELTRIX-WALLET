@@ -11,7 +11,7 @@ There are three automated layers plus a manual on-device checklist.
 
 CI (`.github/workflows/ci.yml`) runs all of them plus the Gradle build.
 
-## Unit & property tests — 108 passing
+## Unit & property tests — 114 passing
 
 | File | Tests | Covers |
 |---|---:|---|
@@ -23,6 +23,7 @@ CI (`.github/workflows/ci.yml`) runs all of them plus the Gradle build.
 | `markets.test.ts` | 9 | deterministic positive demo prices, continuity, history and candles for every range, quote precision, buy with fee and average cost, sell with realized P&L, invalid trades, idempotent orders, portfolio valuation and history |
 | `presets.test.ts` | 16 | all presets across currencies (USD, EUR, JPY, ALL, GBP, TRY, CHF): consistent ledger, snapshots equal a full replay, no negative history, credit within limit, valid cards, nothing in the future, schema round-trip; exact starting balances; realistic sample activity; investor portfolio; reproducibility; empty sandbox; username derivation |
 | `data.test.ts` | 11 | analytics exclusions (transfers, exchanges, reversed pairs), previous-period comparison, trends and empty states, account monthly summaries, ledger search/filters/sorts/grouping/totals, CSV marking and formula-injection protection, backup round-trip, rejection of corrupt files, drift repair, defaults for older files |
+| `calculator.test.ts` | 6 | decimal-exact arithmetic (0.1 + 0.2 = 0.3), operator chaining, percent/sign/backspace, 10-decimal rounding, divide-by-zero and overflow errors, input caps |
 | `planning.test.ts` | 7 | next-occurrence maths, due-rule catch-up and idempotency across restarts and replays, skipped runs with reminders, subscription monthly equivalents, goals via real transfers, budgets net of refunds, bill payment, rollover and one reminder per due date |
 
 ## End-to-end UI tests — 19 passing
@@ -52,7 +53,7 @@ CI (`.github/workflows/ci.yml`) runs all of them plus the Gradle build.
     - the keypad triggers haptics.
 16. 20,000-entry history via backup restore: validation ≈ 0.1 s, apply ≈ 0.4 s, Activity ≈ 0.5 s, list paginated, state persisted through the bridge (> 5 MB).
 17. Accessibility smoke: every visible control on the five main tabs has an accessible name.
-18. Analytics, Wallet and Goals render local data; a goal contribution works.
+18. Analytics, Wallet and Goals render local data; a goal contribution works; the calculator computes 0.1 + 0.2 = 0.3.
 19. No console errors or CSP violations in any of the flows above.
 
 The suite found and fixed real bugs during development:

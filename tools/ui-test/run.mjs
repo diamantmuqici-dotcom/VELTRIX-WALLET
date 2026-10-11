@@ -690,7 +690,7 @@ test('accessibility smoke: every control on the main tabs has a name', async (pa
   expect(problems.length === 0, `unnamed controls:\n${problems.join('\n')}`);
 });
 
-test('analytics, wallet and goals screens render real local data', async (page, h) => {
+test('analytics, wallet, goals and calculator work with local data', async (page, h) => {
   await h.skipSetup();
   await h.clickText('Analytics', 'button.link-btn');
   await h.waitText('Income');
@@ -707,6 +707,11 @@ test('analytics, wallet and goals screens render real local data', async (page, 
   await h.type('0', '25');
   await h.clickText('Add money', '.sheet button', { exact: true });
   expect((await h.toastText()).includes('Saved toward'), 'goal contribution');
+  // Calculator: decimal-exact arithmetic.
+  await h.back();
+  await h.clickText('Calculator', 'button.qa');
+  for (const k of ['Decimal point', '1', 'Add', 'Decimal point', '2', 'Equals']) await h.clickLabel(k);
+  expect(await h.hasText('0.3'), 'calculator: 0.1 + 0.2 should be exactly 0.3');
 });
 
 /* ---------------------------------- Runner --------------------------------- */

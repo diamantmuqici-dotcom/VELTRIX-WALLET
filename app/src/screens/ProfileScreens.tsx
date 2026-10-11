@@ -2,6 +2,7 @@ import {
   ArrowDown,
   ArrowUp,
   Bell,
+  Calculator,
   CalendarClock,
   ChartColumn,
   Copy,
@@ -44,6 +45,7 @@ import { Avatar } from '../ui/components/Glyphs';
 import { useFmt } from '../ui/components/Money';
 import { pick, pickCurrency, SheetHeader } from '../ui/components/pickers';
 import { Badge, Button, Field, Notice, Page, Row, Section, Segmented, TextInput, ToggleRow } from '../ui/components/primitives';
+import { openCalculator } from './CalculatorSheet';
 import { backupFileName, csvFileName, rawFileName } from './fileNames';
 
 const setSettings = (p: Partial<Settings>) => update((s) => ({ ...s, settings: { ...s.settings, ...p } }));
@@ -210,6 +212,7 @@ export function ProfileScreen() {
     ['Schedules', <CalendarClock size={20} />, () => nav.push('recurring')],
     ['Bills', <Receipt size={20} />, () => nav.push('bills')],
     ['Alerts', <Bell size={20} />, () => nav.push('notifications')],
+    ['Calculator', <Calculator size={20} />, () => openCalculator()],
   ];
   return (
     <>
@@ -241,7 +244,7 @@ export function ProfileScreen() {
             Edit
           </Button>
         </div>
-        <div className="qa-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
+        <div className="qa-grid">
           {shortcuts.map(([label, icon, run]) => (
             <button key={label} className="qa" onClick={run}>
               <span className="qa-ico" style={{ width: 50, height: 50, borderRadius: 16 }}>

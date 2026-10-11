@@ -8,6 +8,7 @@ import { confirm, nav, type RouteName, type Tab } from '../state/ui';
 import { AccountGlyph, Avatar } from '../ui/components/Glyphs';
 import { useFmt } from '../ui/components/Money';
 import { Button, EmptyState, Page, SearchInput, Section } from '../ui/components/primitives';
+import { openCalculator } from './CalculatorSheet';
 import { TxnRow } from './common';
 
 const TARGET_TAB: Partial<Record<string, [Tab, RouteName]>> = {
@@ -100,6 +101,7 @@ const SCREEN_INDEX: Array<{ label: string; keywords: string; go: () => void }> =
   { label: 'Appearance', keywords: 'theme dark light accent animation', go: () => nav.push('appearance') },
   { label: 'Data & backup', keywords: 'export csv backup import reset', go: () => nav.push('data') },
   { label: 'Privacy & security', keywords: 'lock privacy hide balances', go: () => nav.push('security') },
+  { label: 'Calculator', keywords: 'calculator calculate math sum', go: () => openCalculator() },
 ];
 
 export function SearchScreen() {
