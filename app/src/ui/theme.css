@@ -1,0 +1,161 @@
+/*
+ * VELTRIX design tokens — the ONLY place where UI colors are defined.
+ * Components reference these variables; TypeScript code that needs a color
+ * (charts, card materials) reads it from src/ui/tokens.ts / cardStyles.ts.
+ */
+
+:root {
+  --font: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji';
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+  --fs-2xs: 10.5px;
+  --fs-xs: 11.5px;
+  --fs-sm: 13px;
+  --fs-md: 15px;
+  --fs-lg: 17px;
+  --fs-xl: 20px;
+  --fs-2xl: 26px;
+  --fs-3xl: 34px;
+  --fs-hero: 44px;
+  --nav-h: 64px;
+  --header-h: 56px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --ime: 0px;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 320ms;
+  --app-max: 480px;
+}
+
+[data-motion='reduced'] {
+  --dur-fast: 60ms;
+  --dur: 100ms;
+  --dur-slow: 140ms;
+}
+
+[data-motion='off'] {
+  --dur-fast: 0ms;
+  --dur: 0ms;
+  --dur-slow: 0ms;
+}
+
+/* ------------------------------ Dark ------------------------------ */
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #07090d;
+  --bg-2: #0b0e14;
+  --surface: #10141b;
+  --surface-2: #161b24;
+  --surface-3: #1d2330;
+  --surface-inverse: #f3f5f9;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.13);
+  --text: #f3f5f9;
+  --text-2: #a4adbc;
+  --text-3: #6b7585;
+  --text-inverse: #0b1220;
+  --positive: #34d399;
+  --positive-soft: rgba(52, 211, 153, 0.14);
+  --negative: #f87171;
+  --negative-soft: rgba(248, 113, 113, 0.14);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.14);
+  --info: #60a5fa;
+  --info-soft: rgba(96, 165, 250, 0.14);
+  --overlay: rgba(2, 4, 8, 0.66);
+  --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 6px 20px rgba(0, 0, 0, 0.32);
+  --shadow-2: 0 18px 48px rgba(0, 0, 0, 0.55);
+  --skeleton: rgba(255, 255, 255, 0.06);
+  --chart-grid: rgba(255, 255, 255, 0.06);
+  --chart-1: #2dd4a7;
+  --chart-2: #8b7cf6;
+  --chart-3: #4c9aff;
+  --chart-4: #f5b544;
+  --chart-5: #f7637a;
+  --chart-6: #22c55e;
+  --chart-7: #e879f9;
+  --chart-8: #94a3b8;
+  --chart-9: #22d3ee;
+  --chart-10: #fb923c;
+  --hero-glow: rgba(255, 255, 255, 0.035);
+  --demo-stripe: rgba(255, 255, 255, 0.04);
+  --focus: rgba(255, 255, 255, 0.55);
+  --knob: #ffffff;
+  --knob-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --ink-on-dark: #ffffff;
+  --ink-on-light: #0b1220;
+  --card-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.35);
+  --present-bg: #030405;
+}
+
+/* ------------------------------ Light ----------------------------- */
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f3f4f7;
+  --bg-2: #eceef2;
+  --surface: #ffffff;
+  --surface-2: #f6f7f9;
+  --surface-3: #eceef3;
+  --surface-inverse: #0b1220;
+  --border: rgba(15, 23, 42, 0.08);
+  --border-strong: rgba(15, 23, 42, 0.15);
+  --text: #0b1220;
+  --text-2: #4f5a6b;
+  --text-3: #858fa0;
+  --text-inverse: #f3f5f9;
+  --positive: #047857;
+  --positive-soft: rgba(5, 150, 105, 0.1);
+  --negative: #c62828;
+  --negative-soft: rgba(220, 38, 38, 0.09);
+  --warning: #a35c00;
+  --warning-soft: rgba(217, 119, 6, 0.12);
+  --info: #1d5fd1;
+  --info-soft: rgba(37, 99, 235, 0.1);
+  --overlay: rgba(15, 23, 42, 0.4);
+  --shadow-1: 0 1px 2px rgba(15, 23, 42, 0.05), 0 6px 20px rgba(15, 23, 42, 0.06);
+  --shadow-2: 0 18px 48px rgba(15, 23, 42, 0.18);
+  --skeleton: rgba(15, 23, 42, 0.06);
+  --chart-grid: rgba(15, 23, 42, 0.07);
+  --chart-1: #0e9f78;
+  --chart-2: #6d5ef6;
+  --chart-3: #2f7cf6;
+  --chart-4: #d98e04;
+  --chart-5: #e5486a;
+  --chart-6: #16a34a;
+  --chart-7: #c026d3;
+  --chart-8: #64748b;
+  --chart-9: #0891b2;
+  --chart-10: #ea580c;
+  --hero-glow: rgba(15, 23, 42, 0.02);
+  --demo-stripe: rgba(15, 23, 42, 0.035);
+  --focus: rgba(11, 18, 32, 0.55);
+  --knob: #ffffff;
+  --knob-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
+  --ink-on-dark: #ffffff;
+  --ink-on-light: #0b1220;
+  --card-shadow: 0 10px 22px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(15, 23, 42, 0.1);
+  --present-bg: #030405;
+}
+
+/* ----------------------------- Accents ---------------------------- */
+[data-theme='dark'][data-accent='mint'] { --accent: #2dd4a7; --accent-ink: #032a20; --accent-text: #3fe0b3; --accent-soft: rgba(45, 212, 167, 0.14); }
+[data-theme='dark'][data-accent='violet'] { --accent: #9b8cff; --accent-ink: #140b3d; --accent-text: #ab9eff; --accent-soft: rgba(155, 140, 255, 0.16); }
+[data-theme='dark'][data-accent='azure'] { --accent: #5aa9ff; --accent-ink: #04203f; --accent-text: #74b7ff; --accent-soft: rgba(90, 169, 255, 0.15); }
+[data-theme='dark'][data-accent='amber'] { --accent: #f5b544; --accent-ink: #2e1d00; --accent-text: #f7c46a; --accent-soft: rgba(245, 181, 68, 0.15); }
+[data-theme='dark'][data-accent='rose'] { --accent: #ff6b8a; --accent-ink: #3a0613; --accent-text: #ff859e; --accent-soft: rgba(255, 107, 138, 0.15); }
+[data-theme='dark'][data-accent='emerald'] { --accent: #3ddc84; --accent-ink: #03260f; --accent-text: #57e396; --accent-soft: rgba(61, 220, 132, 0.15); }
+[data-theme='light'][data-accent='mint'] { --accent: #0fa57d; --accent-ink: #ffffff; --accent-text: #0a805f; --accent-soft: rgba(15, 165, 125, 0.11); }
+[data-theme='light'][data-accent='violet'] { --accent: #6d5ef6; --accent-ink: #ffffff; --accent-text: #5545df; --accent-soft: rgba(109, 94, 246, 0.11); }
+[data-theme='light'][data-accent='azure'] { --accent: #2f7cf6; --accent-ink: #ffffff; --accent-text: #1c63d1; --accent-soft: rgba(47, 124, 246, 0.11); }
+[data-theme='light'][data-accent='amber'] { --accent: #c77e00; --accent-ink: #ffffff; --accent-text: #925c00; --accent-soft: rgba(217, 142, 4, 0.13); }
+[data-theme='light'][data-accent='rose'] { --accent: #e0405f; --accent-ink: #ffffff; --accent-text: #b82846; --accent-soft: rgba(229, 72, 106, 0.11); }
+[data-theme='light'][data-accent='emerald'] { --accent: #16a34a; --accent-ink: #ffffff; --accent-text: #0f7a37; --accent-soft: rgba(22, 163, 74, 0.11); }

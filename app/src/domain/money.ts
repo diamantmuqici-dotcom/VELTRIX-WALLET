@@ -362,8 +362,9 @@ export function formatNumber(value: number, locale = 'en-US', minFrac = 0, maxFr
 
 export function formatPercent(value: number | null, locale = 'en-US', digits = 1, signed = true): string {
   if (value === null || !Number.isFinite(value)) return '—';
-  const s = formatNumber(Math.abs(value), locale, digits, digits);
-  const sign = value > 0 ? (signed ? '+' : '') : value < 0 ? MINUS : '';
+  const rounded = Number(Math.abs(value).toFixed(digits));
+  const s = formatNumber(rounded, locale, digits, digits);
+  const sign = rounded === 0 ? '' : value > 0 ? (signed ? '+' : '') : MINUS;
   return `${sign}${s}%`;
 }
 

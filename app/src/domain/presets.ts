@@ -176,6 +176,12 @@ export function localPrice(usd: number, cur: CurrencyCode): number {
   return Math.round((Math.floor(m) + 0.99) * pow10(dec));
 }
 
+/** USD-equivalent → local minor units, keeping cents (used for balances). */
+export function localBalance(usd: number, cur: CurrencyCode): number {
+  const dec = CURRENCIES[cur].decimals;
+  return Math.round(Number(usdTo(cur).times(usd).toString()) * pow10(dec));
+}
+
 function localExact(usd: number, cur: CurrencyCode): number {
   const dec = CURRENCIES[cur].decimals;
   return Math.max(1, Math.round(Number(usdTo(cur).times(usd).toString()) * pow10(dec)));
@@ -272,7 +278,7 @@ function altStyle(chosen: CardStyle, wanted: CardStyle, fallback: CardStyle): Ca
 function accountsFor(opts: SetupOptions): AccountSpec[] {
   const cur = opts.currency;
   const info = PRESETS.find((p) => p.id === opts.preset) as PresetInfo;
-  const main = opts.startingBalance ?? localNice(info.mainUsd, cur);
+  const main = opts.startingBalance ?? localBalance(info.mainUsd, cur);
   const inv = (usd: number): AccountSpec => ({ id: 'acc_invest', kind: 'investment', name: 'Investment', currency: 'USD', target: Math.round(usd * 100), color: ACCOUNT_COLORS[5], show: true });
   const list: AccountSpec[] = [{ id: MAIN_ACCOUNT_ID, kind: 'wallet', name: 'Main Wallet', currency: cur, target: main, color: ACCOUNT_COLORS[0], show: true }];
   switch (opts.preset) {
@@ -378,8 +384,8 @@ const CONTACTS = [
 const CONTACT_COUNT: Record<PresetId, number> = { minimal: 3, everyday: 6, premium: 8, investor: 4, sandbox: 0 };
 
 const EMPLOYER = { name: 'Brightline Studio (fictional employer)' };
-const P2P_IN_NOTES = ['Dinner split 🍜', 'Thanks for the tickets', 'Groceries share', 'Cab home 🚕', 'Brunch 🥞', 'Gift pool'];
-const P2P_OUT_NOTES = ['Birthday gift 🎁', 'Concert tickets 🎶', 'Your half of rent supplies', 'Coffee run ☕', 'Movie night', 'Thanks for the ride'];
+const P2P_IN_NOTES = ['Dinner split', 'Thanks for the tickets', 'Groceries share', 'Cab home', 'Brunch', 'Gift pool'];
+const P2P_OUT_NOTES = ['Birthday gift', 'Concert tickets', 'Your half of rent supplies', 'Coffee run', 'Movie night', 'Thanks for the ride'];
 
 interface Ctx {
   state: AppState;
@@ -533,13 +539,13 @@ function everydayEvents(c: Ctx, withCredit: boolean): Event[] {
   ev.push({
     at: at(now, 12, 18, 0),
     run: (s, ctx) => {
-      const r = createRequest(s, { party: contactParty(s, rng), amount: localNice(18, cur), accountId: MAIN_ACCOUNT_ID, note: 'Lunch 🥗' }, ctx);
+      const r = createRequest(s, { party: contactParty(s, rng), amount: localNice(18, cur), accountId: MAIN_ACCOUNT_ID, note: 'Lunch' }, ctx);
       return r.ok ? keep(resolveRequest(r.state, r.request.id, 'accept', { ...ctx, now: new Date(ctx.now.getTime() + 5 * 3600_000) }), r.state) : s;
     },
   });
   ev.push({ at: at(now, 2, 16, 40), run: (s, ctx) => keep(createRequest(s, { party: contactParty(s, rng), amount: localNice(35, cur), accountId: MAIN_ACCOUNT_ID, note: 'Shared gift', direction: 'incoming' }, ctx), s) });
-  ev.push({ at: at(now, 1, 21, 5), run: (s, ctx) => keep(createRequest(s, { party: contactParty(s, rng), amount: localNice(24, cur), accountId: MAIN_ACCOUNT_ID, note: 'Pizza night 🍕' }, ctx), s) });
-  ev.push({ at: new Date(now.getTime() - 3 * 3600_000), run: (s, ctx) => keep(sendMoney(s, { recipient: contactParty(s, rng), amount: localNice(45, cur), accountId: MAIN_ACCOUNT_ID, note: 'Concert tickets 🎶', outcome: 'pending' }, ctx), s) });
+  ev.push({ at: at(now, 1, 21, 5), run: (s, ctx) => keep(createRequest(s, { party: contactParty(s, rng), amount: localNice(24, cur), accountId: MAIN_ACCOUNT_ID, note: 'Pizza night' }, ctx), s) });
+  ev.push({ at: new Date(now.getTime() - 3 * 3600_000), run: (s, ctx) => keep(sendMoney(s, { recipient: contactParty(s, rng), amount: localNice(45, cur), accountId: MAIN_ACCOUNT_ID, note: 'Concert tickets', outcome: 'pending' }, ctx), s) });
   return ev;
 }
 
@@ -567,8 +573,8 @@ function lightEvents(c: Ctx): Event[] {
     [2, 'Lumen Cinema', 14.5, 'entertainment'],
   ];
   for (const [d, merchant, usd, cat] of spends) ev.push({ at: at(now, d, 12 + Math.floor(rng() * 8), Math.floor(rng() * 59)), run: buy(c, MAIN_ACCOUNT_ID, merchant, usd, cat) });
-  ev.push({ at: at(now, 8, 19, 30), run: (s, ctx) => keep(sendMoney(s, { recipient: contactParty(s, rng), amount: localNice(40, cur), accountId: MAIN_ACCOUNT_ID, note: 'Dinner 🍝' }, ctx), s) });
-  ev.push({ at: at(now, 4, 13, 15), run: (s, ctx) => keep(receiveMoney(s, { from: contactParty(s, rng), amount: localNice(25, cur), accountId: MAIN_ACCOUNT_ID, note: 'Cab home 🚕' }, ctx), s) });
+  ev.push({ at: at(now, 8, 19, 30), run: (s, ctx) => keep(sendMoney(s, { recipient: contactParty(s, rng), amount: localNice(40, cur), accountId: MAIN_ACCOUNT_ID, note: 'Dinner' }, ctx), s) });
+  ev.push({ at: at(now, 4, 13, 15), run: (s, ctx) => keep(receiveMoney(s, { from: contactParty(s, rng), amount: localNice(25, cur), accountId: MAIN_ACCOUNT_ID, note: 'Cab home' }, ctx), s) });
   return ev;
 }
 

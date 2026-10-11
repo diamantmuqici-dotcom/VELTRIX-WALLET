@@ -80,7 +80,7 @@ describe('ledger search & filters', () => {
     expect(filterLedger(s, { ...EMPTY_FILTER, accountId: 'acc_savings' }).length).toBe(1); // transfer in (opened at zero)
     expect(filterLedger(s, { ...EMPTY_FILTER, cardId: s.cards[0].id }).length).toBe(5); // 4 purchases + refund
     expect(filterLedger(s, { ...EMPTY_FILTER, from: '2026-03-02', to: '2026-03-03' }).length).toBe(2);
-    expect(filterLedger(s, { ...EMPTY_FILTER, minAmount: 10_000, maxAmount: 12_000, types: ['purchase'] }).length).toBe(1);
+    expect(filterLedger(s, { ...EMPTY_FILTER, minAmount: 100, maxAmount: 120, types: ['purchase'] }).length).toBe(1);
     const newest = filterLedger(s, { ...EMPTY_FILTER, sort: 'newest' });
     const oldest = filterLedger(s, { ...EMPTY_FILTER, sort: 'oldest' });
     expect(newest[0].id).toBe(oldest[oldest.length - 1].id);

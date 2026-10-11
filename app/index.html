@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-accent="mint" data-motion="full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#07090d" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="description" content="VELTRIX Wallet — a fictional fintech simulator. No real money, cards or accounts." />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>VELTRIX Wallet — Simulator</title>
+    <style>
+      html, body { margin: 0; background: #07090d; }
+      @media (prefers-color-scheme: light) { html, body { background: #f3f4f7; } }
+      #legacy { display: none; font: 15px/1.5 system-ui, sans-serif; color: #e5e7eb; padding: 32px 24px; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="legacy" role="alert">
+      <h1 style="font-size:20px">VELTRIX needs a newer Android System WebView</h1>
+      <p>Please update “Android System WebView” or Chrome from the Play Store, then reopen VELTRIX. Nothing has been changed.</p>
+    </div>
+    <script src="./legacy-check.js"></script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

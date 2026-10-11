@@ -3,7 +3,7 @@ import { endOfDay, monthKeyOf, parseDayKey } from './dates';
 import { simRef } from './ids';
 import { CATEGORY_LABEL, txnTypeLabel } from './labels';
 import { effectOn } from './ledger';
-import { minorToDecimalString } from './money';
+import { minorToDecimalString, pow10 } from './money';
 import type { AppState, Category, DayKey, Txn, TxnStatus, TxnType } from './types';
 
 export type SortOrder = 'newest' | 'oldest' | 'amount_desc' | 'amount_asc';
@@ -24,7 +24,7 @@ export interface LedgerFilter {
   cardId: string | null;
   from: DayKey | null;
   to: DayKey | null;
-  /** inclusive bounds in minor units of each entry's own currency */
+  /** inclusive bounds in MAJOR units of each entry's own currency (e.g. 12.5 = $12.50 or ¥12.5) */
   minAmount: number | null;
   maxAmount: number | null;
   sort: SortOrder;
@@ -96,8 +96,11 @@ export function filterLedger(state: AppState, f: LedgerFilter): Txn[] {
       if (from !== null && time < from) return false;
       if (to !== null && time > to) return false;
     }
-    if (f.minAmount !== null && t.amount < f.minAmount) return false;
-    if (f.maxAmount !== null && t.amount > f.maxAmount) return false;
+    if (f.minAmount !== null || f.maxAmount !== null) {
+      const major = t.amount / pow10(CURRENCIES[t.currency].decimals);
+      if (f.minAmount !== null && major < f.minAmount - 1e-9) return false;
+      if (f.maxAmount !== null && major > f.maxAmount + 1e-9) return false;
+    }
     if (terms.length) {
       const h = haystack(state, t);
       for (const term of terms) if (!h.includes(term)) return false;

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { CurrencyCode } from '../src/domain/currency';
 import { sequentialIds } from '../src/domain/ids';
 import { rebuildSnapshots, verifyLedger } from '../src/domain/ledger';
-import { createInitialState, localNice, PRESETS, usernameFrom } from '../src/domain/presets';
+import { createInitialState, localBalance, PRESETS, usernameFrom } from '../src/domain/presets';
 import { loadState } from '../src/domain/schema';
 import type { PresetId } from '../src/domain/types';
 
@@ -72,7 +72,7 @@ describe('setup presets', () => {
   it('lands the main wallet exactly on the preset or chosen balance', () => {
     for (const p of PRESETS) {
       const s = make(p.id, 'EUR');
-      expect(s.accounts.find((a) => a.id === 'acc_main')?.balance).toBe(localNice(p.mainUsd, 'EUR'));
+      expect(s.accounts.find((a) => a.id === 'acc_main')?.balance).toBe(localBalance(p.mainUsd, 'EUR'));
     }
     expect(make('everyday', 'USD', 123_45).accounts.find((a) => a.id === 'acc_main')?.balance).toBe(12_345);
     expect(make('everyday', 'USD', 0).accounts.find((a) => a.id === 'acc_main')?.balance).toBe(0);

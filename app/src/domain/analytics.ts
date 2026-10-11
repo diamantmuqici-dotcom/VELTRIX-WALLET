@@ -142,17 +142,22 @@ export interface PeriodComparison {
   previousTo: Date;
 }
 
-/** Compares the filter period with the immediately preceding period of equal length. */
-export function comparePrevious(state: AppState, f: AnalyticsFilter): PeriodComparison {
-  const span = f.to.getTime() - f.from.getTime();
-  const previousTo = new Date(f.from.getTime() - 1);
-  const previousFrom = new Date(previousTo.getTime() - span);
+/** Compares the filter period with an explicit comparison period. */
+export function compareRanges(state: AppState, f: AnalyticsFilter, previousFrom: Date, previousTo: Date): PeriodComparison {
   return {
     current: summarize(analyticsEntries(state, f)),
     previous: summarize(analyticsEntries(state, { ...f, from: previousFrom, to: previousTo })),
     previousFrom,
     previousTo,
   };
+}
+
+/** Compares the filter period with the immediately preceding period of equal length. */
+export function comparePrevious(state: AppState, f: AnalyticsFilter): PeriodComparison {
+  const span = f.to.getTime() - f.from.getTime();
+  const previousTo = new Date(f.from.getTime() - 1);
+  const previousFrom = new Date(previousTo.getTime() - span);
+  return compareRanges(state, f, previousFrom, previousTo);
 }
 
 export type Bucket = 'day' | 'week' | 'month';

@@ -11,3 +11,6 @@ tools/ui-test/out/
 .DS_Store
 
 # Keep the verified release APK (release/) — it is a deliverable.
+
+# Local screenshots from exploratory runs
+app/.shots/
