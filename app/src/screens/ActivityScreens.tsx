@@ -215,7 +215,7 @@ export function ActivityScreen() {
           </div>
         )}
         <div className="small muted" style={{ margin: '12px 4px 0' }}>
-          {results.length} {results.length === 1 ? 'entry' : 'entries'} · {SORT_LABEL[filter.sort]}
+          {f.num(results.length)} {results.length === 1 ? 'entry' : 'entries'} · {SORT_LABEL[filter.sort]}
         </div>
         {results.length === 0 ? (
           <EmptyState icon={<FileText size={24} />} title={app.transactions.length ? 'No matching entries' : 'No activity yet'} action={app.transactions.length ? <Button variant="secondary" size="sm" onClick={() => setFilter(EMPTY_FILTER)}>Clear search & filters</Button> : <Button size="sm" onClick={() => nav.push('send')}>Simulate a payment</Button>}>

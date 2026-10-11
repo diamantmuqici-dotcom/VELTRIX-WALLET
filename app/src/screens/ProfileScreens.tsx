@@ -668,7 +668,7 @@ export function DataScreen() {
     }
     const ok = await confirm({
       title: 'Replace all data with this backup?',
-      message: `The backup contains ${r.state.accounts.length} accounts, ${r.state.cards.length} cards and ${r.state.transactions.length} ledger entries. Everything currently in VELTRIX on this device will be replaced.${r.warnings.length ? `\n\nNote: ${r.warnings.join(' ')}` : ''}`,
+      message: `The backup contains ${f.num(r.state.accounts.length)} accounts, ${f.num(r.state.cards.length)} cards and ${f.num(r.state.transactions.length)} ledger entries. Everything currently in VELTRIX on this device will be replaced.${r.warnings.length ? `\n\nNote: ${r.warnings.join(' ')}` : ''}`,
       confirmLabel: 'Replace',
       destructive: true,
     });

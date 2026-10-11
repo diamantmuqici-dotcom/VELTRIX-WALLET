@@ -6,7 +6,7 @@ import { createInitialState, localBalance, PRESETS, usernameFrom } from '../doma
 import type { AccentName, Card, CardStyle, PresetId, ThemeMode } from '../domain/types';
 import { validateName } from '../domain/validation';
 import { finishSetup } from '../state/store';
-import { toast } from '../state/ui';
+import { toast, useBackInterceptor } from '../state/ui';
 import { STYLE_NAME, STYLE_ORDER } from '../ui/cardStyles';
 import { LogoMark } from '../ui/components/Brand';
 import { DemoCard, MaterialSwatch } from '../ui/components/DemoCard';
@@ -75,15 +75,13 @@ export function SetupWizard() {
   const patch = (p: Partial<Choices>) => setC((x) => ({ ...x, ...p }));
   const resolved = useResolvedTheme(c.theme);
   useLayoutEffect(() => applyTheme(resolved, c.accent, 'full', c.theme), [resolved, c.accent, c.theme]);
-  useLayoutEffect(() => {
-    window.__veltrixBack = () => {
-      if (step >= 0) {
-        setStep((s) => s - 1);
-        return true;
-      }
-      return false;
-    };
-  }, [step]);
+  useBackInterceptor(() => {
+    if (step >= 0) {
+      setStep((s) => s - 1);
+      return true;
+    }
+    return false;
+  });
 
   const preset = PRESETS.find((p) => p.id === c.preset)!;
   const dec = CURRENCIES[c.currency].decimals;
@@ -263,7 +261,7 @@ export function SetupWizard() {
               Main wallet balance (simulated). Leave empty to use the preset’s {formatMoney(presetBalance, c.currency)}.
             </p>
             <div className="amount-entry">
-              {c.balanceText ? <AmountDisplay text={c.balanceText} currency={c.currency} locale="en-US" invalid={!!balanceError} /> : <div className="amount-hero amount empty">{formatMoney(presetBalance, c.currency)}</div>}
+              {c.balanceText ? <AmountDisplay text={c.balanceText} currency={c.currency} locale="en-US" invalid={!!balanceError} /> : <div className="amount-hero amount is-empty">{formatMoney(presetBalance, c.currency)}</div>}
               <div className="small" style={{ minHeight: 20 }}>
                 {balanceError ? <span className="neg">{balanceError}</span> : c.balanceText ? <button className="link-btn" onClick={() => patch({ balanceText: '' })}>Use preset default</button> : <span className="faint">Preset default</span>}
               </div>

@@ -203,6 +203,15 @@ describe('currency exchange', () => {
     expectConsistent(r.state);
   });
 
+  it('charges no fee when the optional fee is switched off', () => {
+    const { state, ctx } = fixture();
+    const r = ok(exchange(state, { fromId: 'acc_main', toId: 'acc_eur', amount: 10_000, rate: '0.86', rateSource: 'demo', rateTimestamp: DEMO_RATES.publishedAt, withFee: false }, ctx));
+    expect(r.quote.fee).toBe(0);
+    expect(balance(r.state, 'acc_main')).toBe(90_000);
+    expect(balance(r.state, 'acc_eur')).toBe(28_600);
+    expectConsistent(r.state);
+  });
+
   it('handles zero-decimal currencies and rejects bad rates', () => {
     const { state, ctx } = fixture();
     const rate = crossRate(DEMO_RATES, 'USD', 'JPY');

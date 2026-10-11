@@ -6,8 +6,8 @@ import { authenticate, deviceLockAvailable, exitApp, isNative, nativeInsets, typ
 import { SCREENS } from './screens';
 import { RecoveryScreen } from './screens/RecoveryScreen';
 import { SetupWizard } from './screens/SetupWizard';
-import { flush, init, onResume, useSnapshot } from './state/store';
-import { getUI, handleBack, nav, TABS, useUI, type Route, type Tab } from './state/ui';
+import { dismissNotice, flush, init, onResume, useSnapshot } from './state/store';
+import { getUI, handleBack, nav, TABS, toast, useUI, type Route, type Tab } from './state/ui';
 import { LogoMark } from './ui/components/Brand';
 import { DialogHost, SheetHost, ToastHost } from './ui/components/Overlays';
 import { Button, ScreenContext, tap } from './ui/components/primitives';
@@ -187,6 +187,15 @@ export default function App() {
     const t = setTimeout(() => setSplash(false), 280);
     return () => clearTimeout(t);
   }, [snap.phase]);
+  useEffect(() => {
+    if (snap.phase !== 'ready' || snap.notices.length === 0) return;
+    const text = snap.notices[0];
+    dismissNotice(0);
+    toast(text, 'info');
+  }, [snap.phase, snap.notices]);
+  useEffect(() => {
+    if (snap.saveFailed) toast('Couldn’t save to device storage. Your latest changes may be lost — export a backup from Settings → Data.', 'error', { label: 'Open', run: () => nav.open('profile', 'data') });
+  }, [snap.saveFailed]);
   const settings = snap.app?.settings;
   const [locked, unlock] = useAppLock(!!settings?.appLock);
   return (

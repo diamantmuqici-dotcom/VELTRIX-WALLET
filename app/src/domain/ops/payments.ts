@@ -441,6 +441,8 @@ export interface ExchangeInput {
   rate: string | null;
   rateSource: RateSourceKind;
   rateTimestamp: string;
+  /** Charge the configured simulated exchange fee (default true). */
+  withFee?: boolean;
   opKey?: string;
 }
 
@@ -452,7 +454,14 @@ export interface ExchangeQuote {
   rate: string;
 }
 
-export function quoteExchange(state: AppState, fromCurrency: keyof typeof CURRENCIES, toCurrency: keyof typeof CURRENCIES, amount: number, rate: string | null): ExchangeQuote | { error: 'missing_rate' | 'invalid_rate' | 'amount_too_small' | 'invalid_amount' } {
+export function quoteExchange(
+  state: AppState,
+  fromCurrency: keyof typeof CURRENCIES,
+  toCurrency: keyof typeof CURRENCIES,
+  amount: number,
+  rate: string | null,
+  withFee = true,
+): ExchangeQuote | { error: 'missing_rate' | 'invalid_rate' | 'amount_too_small' | 'invalid_amount' } {
   if (rate === null || rate === undefined || rate === '') return { error: 'missing_rate' };
   let r: Big;
   try {
@@ -462,7 +471,7 @@ export function quoteExchange(state: AppState, fromCurrency: keyof typeof CURREN
   }
   if (r.lte(0)) return { error: 'invalid_rate' };
   if (!isValidAmount(amount, fromCurrency)) return { error: 'invalid_amount' };
-  const fee = computeFee(amount, state.settings.fees.exchange);
+  const fee = withFee ? computeFee(amount, state.settings.fees.exchange) : 0;
   const converted = convertMinor(amount, CURRENCIES[fromCurrency].decimals, CURRENCIES[toCurrency].decimals, rate);
   if (converted <= 0) return { error: 'amount_too_small' };
   return { amount, fee, totalDebit: amount + fee, converted, rate: r.toString() };
@@ -481,7 +490,7 @@ export function exchange(state: AppState, input: ExchangeInput, ctx: OpContext):
   if (from.currency === to.currency) return fail('currency_mismatch', 'Both accounts use the same currency — use Transfer instead.');
   if (from.kind === 'credit' || to.kind === 'credit') return fail('invalid_input', 'Exchanges with credit accounts are not simulated.');
   if (!input.amount) return fail('missing_amount');
-  const q = quoteExchange(state, from.currency, to.currency, input.amount, input.rate);
+  const q = quoteExchange(state, from.currency, to.currency, input.amount, input.rate, input.withFee !== false);
   if ('error' in q) return fail(q.error);
   const tracked = state.settings.trackBalances;
   const e = checkDebit(state, from, q.totalDebit, tracked);

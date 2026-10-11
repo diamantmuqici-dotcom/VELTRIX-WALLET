@@ -110,16 +110,21 @@ export function filterLedger(state: AppState, f: LedgerFilter): Txn[] {
   return sortLedger(out, f.sort);
 }
 
+/** The magnitude shown in lists: incoming net of fees, outgoing and internal including fees. */
+export function displayMagnitude(t: Txn): number {
+  return t.direction === 'in' ? t.amount - t.fee : t.amount + t.fee;
+}
+
 export function sortLedger(txns: Txn[], sort: SortOrder): Txn[] {
-  const withIndex = txns.map((t, i) => ({ t, i, time: new Date(t.createdAt).getTime() }));
+  const withIndex = txns.map((t, i) => ({ t, i, time: new Date(t.createdAt).getTime(), mag: displayMagnitude(t) }));
   withIndex.sort((a, b) => {
     switch (sort) {
       case 'oldest':
         return a.time - b.time || a.i - b.i;
       case 'amount_desc':
-        return b.t.amount - a.t.amount || b.time - a.time;
+        return b.mag - a.mag || b.time - a.time;
       case 'amount_asc':
-        return a.t.amount - b.t.amount || b.time - a.time;
+        return a.mag - b.mag || b.time - a.time;
       default:
         return b.time - a.time || b.i - a.i;
     }

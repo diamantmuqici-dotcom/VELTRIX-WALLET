@@ -89,6 +89,8 @@ describe('setup presets', () => {
     expect(withSample.transactions.some((t) => t.type === 'refund')).toBe(true);
     expect(withSample.transactions.some((t) => t.type === 'exchange')).toBe(true);
     expect(withSample.transactions.some((t) => t.type === 'credit_payment')).toBe(true);
+    // Regular everyday spending: a grocery trip every few days.
+    expect(withSample.transactions.filter((t) => t.category === 'food' && t.amount > 2_000).length).toBeGreaterThan(15);
     expect(withSample.goals[0].saved).toBeGreaterThan(0);
     expect(withSample.notifications.length).toBe(1);
   });

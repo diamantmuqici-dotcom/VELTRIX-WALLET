@@ -501,12 +501,12 @@ function everydayEvents(c: Ctx, withCredit: boolean): Event[] {
     }
   }
   // Day-to-day activity.
-  let nextGrocery = 2;
+  let nextGrocery = 95;
   for (let d = 95; d >= 0; d--) {
-    if (d === nextGrocery || d === 95) {
+    if (d === nextGrocery) {
       ev.push({ at: at(now, d, 17, Math.floor(rng() * 50)), run: buy(c, MAIN_ACCOUNT_ID, pick(rng, GROCERS), between(rng, 28, 115), 'food') });
+      nextGrocery = d - 3 - Math.floor(rng() * 3);
     }
-    if (d <= nextGrocery) nextGrocery = d - 3 - Math.floor(rng() * 3);
     if (rng() < 0.35) ev.push({ at: at(now, d, 8, Math.floor(rng() * 55)), run: buy(c, MAIN_ACCOUNT_ID, 'Bean & Bloom Café', between(rng, 3.2, 6.8), 'food') });
     if (rng() < 0.25) ev.push({ at: at(now, d, 7, 30 + Math.floor(rng() * 25)), run: buy(c, MAIN_ACCOUNT_ID, 'Metro Transit', between(rng, 2.9, 18), 'transport') });
     if (rng() < 0.17) ev.push({ at: at(now, d, 20, Math.floor(rng() * 50)), run: buy(c, MAIN_ACCOUNT_ID, pick(rng, DINING), between(rng, 18, 72), 'food') });
@@ -820,6 +820,15 @@ export function createInitialState(opts: SetupOptions): AppState {
     }
     s = settleOpenings(s, new Map(specs.map((a) => [a.id, { target: a.target, exact: a.id === MAIN_ACCOUNT_ID }])), openedAt, now, id);
   }
+
+  // Schedules that already ran in the sample history report those runs.
+  s = {
+    ...s,
+    recurring: s.recurring.map((r) => {
+      const runs = s.transactions.filter((t) => t.links?.ruleId === r.id);
+      return runs.length ? { ...r, runs: runs.length, lastRunAt: runs[runs.length - 1].createdAt } : r;
+    }),
+  };
 
   // 7. Defaults, welcome notification, clean idempotency log.
   const firstCard = [...s.cards].sort((a, b) => a.order - b.order)[0];

@@ -61,7 +61,7 @@ export function Keypad({ value, onChange, currency, active = true }: { value: st
 
 export function AmountDisplay({ text, currency, locale, invalid }: { text: string; currency: CurrencyCode; locale: string; invalid?: boolean }) {
   return (
-    <div className={`amount-hero amount${text ? '' : ' empty'}${invalid ? ' invalid' : ''}`} aria-live="polite">
+    <div className={`amount-hero amount${text ? '' : ' is-empty'}${invalid ? ' invalid' : ''}`} aria-live="polite">
       {formatTypedAmount(text, currency, locale)}
     </div>
   );

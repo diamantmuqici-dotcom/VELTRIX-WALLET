@@ -894,6 +894,10 @@ button.row:active {
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
+.input:focus-visible {
+  outline: none;
+}
+
 .input[aria-invalid='true'] {
   border-color: var(--negative);
 }
@@ -1013,7 +1017,7 @@ textarea.input {
   word-break: break-all;
 }
 
-.amount-hero.empty {
+.amount-hero.is-empty {
   color: var(--text-3);
 }
 

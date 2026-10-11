@@ -16,7 +16,7 @@ import { pickAccount, pickCurrency, SheetHeader } from '../ui/components/pickers
 import { Badge, Button, Chip, KV, Notice, Page, Section, Switch, TextInput, ToggleRow, useScreen } from '../ui/components/primitives';
 import { TxnRow } from './common';
 
-function ExchangeSheet({ from, to, amount, snapshot, close }: { from: CurrencyCode; to: CurrencyCode; amount: number; snapshot: RateSnapshot; close: () => void }) {
+function ExchangeSheet({ from, to, amount, snapshot, withFee, close }: { from: CurrencyCode; to: CurrencyCode; amount: number; snapshot: RateSnapshot; withFee: boolean; close: () => void }) {
   const app = useApp();
   const f = useFmt();
   const fromAccounts = app.accounts.filter((a) => !a.archived && a.currency === from && a.kind !== 'credit');
@@ -27,10 +27,10 @@ function ExchangeSheet({ from, to, amount, snapshot, close }: { from: CurrencyCo
   const fromAcc = app.accounts.find((a) => a.id === fromId);
   const toAcc = app.accounts.find((a) => a.id === toId);
   const rate = crossRate(snapshot, from, to);
-  const q = quoteExchange(app, from, to, amount, rate);
+  const q = quoteExchange(app, from, to, amount, rate, withFee);
   const confirmIt = () => {
     const r = act(
-      (s, ctx) => exchange(s, { fromId, toId, amount, rate, rateSource: snapshot.kind, rateTimestamp: snapshot.publishedAt, opKey }, ctx),
+      (s, ctx) => exchange(s, { fromId, toId, amount, rate, rateSource: snapshot.kind, rateTimestamp: snapshot.publishedAt, withFee, opKey }, ctx),
       { success: 'Simulated conversion completed' },
     );
     if (r.ok) {
@@ -97,7 +97,7 @@ function ExchangeSheet({ from, to, amount, snapshot, close }: { from: CurrencyCo
               ) : (
                 <div className="panel pad" style={{ paddingTop: 4, paddingBottom: 4 }}>
                   <KV k="Amount" v={f.money(q.amount, from)} />
-                  <KV k={`Simulated fee (${(app.settings.fees.exchange.bps / 100).toFixed(2)}%)`} v={f.money(q.fee, from)} />
+                  <KV k={withFee ? `Simulated fee (${(app.settings.fees.exchange.bps / 100).toFixed(2)}%)` : 'Simulated fee'} v={withFee ? f.money(q.fee, from) : 'Not charged'} />
                   <KV k="Total debited" v={<span className="strong">{f.money(q.totalDebit, from)}</span>} />
                   <KV k="Rate" v={`1 ${from} = ${formatRate(q.rate, f.locale)} ${to}`} />
                   <KV k="Calculation" v={`${f.money(q.amount, from)} × ${formatRate(q.rate, f.locale)}`} />
@@ -265,7 +265,7 @@ export function ExchangeScreen() {
         <div className="row" style={{ padding: '8px 0 0', minHeight: 44 }}>
           <div className="row-main">
             <div className="row-title small">Include simulated fee</div>
-            <div className="row-sub xsmall">{withFee ? `Fee ${f.money(fee, from)} on top · total ${f.money(amount + fee, from)}` : `${(app.settings.fees.exchange.bps / 100).toFixed(2)}% charged in ${from}`}</div>
+            <div className="row-sub xsmall">{withFee ? `Fee ${f.money(fee, from)} on top · total ${f.money(amount + fee, from)}` : `Off — conversions are fee-free (${(app.settings.fees.exchange.bps / 100).toFixed(2)}% when on)`}</div>
           </div>
           <Switch checked={withFee} onChange={setWithFee} label="Include simulated fee" />
         </div>
@@ -295,8 +295,7 @@ export function ExchangeScreen() {
           block
           disabled={amount <= 0 || !rate || from === to}
           onClick={() => {
-            const id = openSheet((close) => <ExchangeSheet from={from} to={to} amount={amount} snapshot={snapshot} close={close} />, { tall: true });
-            void id;
+            openSheet((close) => <ExchangeSheet from={from} to={to} amount={amount} snapshot={snapshot} withFee={withFee} close={close} />, { tall: true });
           }}
         >
           Simulate conversion

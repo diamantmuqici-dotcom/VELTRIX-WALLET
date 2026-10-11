@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#F3F4F7</color>
+    <color name="accent">#0FA57D</color>
+    <color name="nav_fallback">#000000</color>
+    <color name="ic_launcher_bg">#0C1018</color>
+    <color name="logo_mark">#F3F5F9</color>
+    <color name="logo_facet">#2DD4A7</color>
+</resources>
