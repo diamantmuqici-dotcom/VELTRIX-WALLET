@@ -2,6 +2,10 @@
 node_modules/
 app/dist/
 android/build/
+android/build-apk/
+android/app/build/
+android/.gradle/
+android/local.properties
 tools/ui-test/node_modules/
 tools/ui-test/out/
 

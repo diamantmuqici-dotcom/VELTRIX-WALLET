@@ -25,7 +25,7 @@ STORE_PASS="${VELTRIX_STORE_PASS:-veltrix-dev}"
 KEY_PASS="${VELTRIX_KEY_PASS:-veltrix-dev}"
 
 SRC="$ROOT/android/app/src/main"
-OUT="$ROOT/android/build"
+OUT="$ROOT/android/build-apk"
 RELEASE_DIR="$ROOT/release"
 
 step() { printf '\n\033[1m▸ %s\033[0m\n' "$*"; }

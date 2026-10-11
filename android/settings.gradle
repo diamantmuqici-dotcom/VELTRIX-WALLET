@@ -1,0 +1,20 @@
+// Optional Gradle build for Android Studio users.
+// The reference build is tools/build-apk.sh (no Gradle/Maven needed); both produce the same app.
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'VELTRIX Wallet'
+include ':app'
