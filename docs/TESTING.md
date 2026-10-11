@@ -79,6 +79,69 @@ The suite found and fixed real bugs during development:
   - the widget receiver is not exported.
 - `dexdump` header: a valid dex 037 file.
 
+## Windows .exe verification (each build)
+
+`tools/build-exe.sh` verifies the launcher two ways, because a PE image built on
+Linux cannot simply be executed here.
+
+**Static, on the Windows image itself:**
+
+- PE32+ (`0x20b`), machine `0x8664` (x64), and **subsystem 2 (GUI)** — subsystem 3
+  would pop a console window next to the app.
+- The embedded bundle is present *verbatim*: `app/dist/index.html` is found
+  byte-for-byte inside the image, as are the launcher's own strings.
+
+**Functional, on the same source file compiled for the host** (27 checks over
+HTTP):
+
+- `GET /` returns `index.html` with the same SHA-256 as `app/dist/index.html`.
+- Every asset (JS, CSS, woff2, SVG) returns 200 with the right `Content-Type` and
+  the right byte count.
+- Hashed `/assets/*` are `max-age=31536000, immutable`; `index.html` is
+  `no-cache`; every response carries `X-Content-Type-Options: nosniff`.
+- `HEAD /` returns 200 with an empty body; `POST /` returns 405.
+- An extension-less unknown path falls back to `index.html` (SPA reload); an
+  unknown path *with* an extension 404s.
+- `../` traversal and an embedded NUL are rejected with 400.
+- The launcher binds the fixed default port (43921), so the origin — and the
+  wallet's `localStorage` — is stable across launches.
+- **Loopback-only**, asserted from the kernel's view of the process's own sockets
+  (`ss -ltnp` filtered by PID): exactly one listener, on `127.0.0.1`. This is
+  *not* checked by probing another interface address — inside a container a
+  port-forwarder often listens on the external address for every port in use and
+  proxies to loopback, so such a probe reports the forwarder's answer, not the
+  launcher's binding. That mistake was made once and is the reason for the
+  comment.
+- **Single-instance:** a second launcher on the default port recognises the first
+  via `GET /__veltrix/ping`, reports the conflict and exits (1) instead of
+  double-binding; the first keeps serving. A second launcher given an explicit
+  occupied `--port` fails loudly with that port named. The probe runs under
+  `timeout`, because a launcher that wrongly re-binds would otherwise block in
+  `accept()` forever and hang the build rather than fail it.
+
+**End-to-end, against the launcher:** the whole 19-test suite is re-run with
+`node run.mjs --base-url=http://127.0.0.1:43921/`, so the flows are driven
+against the bundle *as the launcher serves it*, on a different origin from the
+built-in static server. All 19 pass with zero console errors or CSP violations.
+
+What none of this covers is the launcher's Windows-only branches — see the
+checklist below.
+
+## Manual Windows checklist
+
+No Windows host was available when this was built.
+
+- [ ] Double-click `release/VELTRIX-Wallet-v1.0.0-win-x64.exe`: SmartScreen warns (unsigned — expected); "More info → Run anyway" starts it.
+- [ ] The Explorer/taskbar icon is the VELTRIX mark, not a generic executable icon.
+- [ ] No console window appears at any point.
+- [ ] An app-mode window opens (no address bar, no tabs) at roughly 420×880, and the setup wizard runs.
+- [ ] Close the window: the process exits (`Get-Process` shows nothing left) and port 43921 is released.
+- [ ] Relaunch: data persisted — same origin, same `--user-data-dir` profile.
+- [ ] Launch a second time while the first is open: a second window appears on the same server; no second process holds the port.
+- [ ] On a machine with only Chrome (no Edge), and with neither installed: the first works, the second shows the explanatory dialog and exits.
+- [ ] The user's own browser profile is untouched (bookmarks, logins, open tabs).
+- [ ] Airplane mode: everything works with labelled demo rates.
+
 ## Manual on-device checklist
 
 No emulator was available when this was built, so run this pass on a real device (Android 7.0+; ideally one each of API 24–28, 29–32 and 33+).

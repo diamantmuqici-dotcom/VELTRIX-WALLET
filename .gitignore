@@ -18,3 +18,6 @@ tools/ui-test/out/
 
 # Local screenshots from exploratory runs
 app/.shots/
+
+# Generated desktop build (assets.zig, www/, .ico, .res, host test binary)
+desktop/build/
