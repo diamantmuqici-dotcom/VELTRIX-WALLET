@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VELTRIX Wallet</string>
+    <string name="widget_name">VELTRIX demo card</string>
+    <string name="widget_description">Shows your default VELTRIX demo card. Simulated — not a real payment card.</string>
+</resources>

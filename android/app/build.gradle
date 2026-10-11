@@ -1,0 +1,65 @@
+plugins {
+    id 'com.android.application'
+}
+
+// The UI is the Vite production bundle from ../app (run `npm ci && npm run build` there first).
+def webDist = file("${rootDir}/../app/dist")
+def webAssetsRoot = file("${buildDir}/generated/veltrix-web")
+
+android {
+    namespace 'com.veltrix.wallet'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.veltrix.wallet'
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName '1.0.0'
+    }
+
+    signingConfigs {
+        // Public development key — see android/keystore/README.md. Use your own key for any distribution.
+        dev {
+            storeFile file('../keystore/veltrix-dev.jks')
+            storePassword 'veltrix-dev'
+            keyAlias 'veltrix'
+            keyPassword 'veltrix-dev'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.dev
+        }
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.dev
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main {
+            assets.srcDirs = [webAssetsRoot]
+        }
+    }
+}
+
+def copyWebBundle = tasks.register('copyWebBundle', Copy) {
+    from webDist
+    into new File(webAssetsRoot, 'www')
+    doFirst {
+        if (!new File(webDist, 'index.html').exists()) {
+            throw new GradleException('Web bundle missing: run `npm ci && npm run build` in the app/ directory first.')
+        }
+    }
+}
+
+tasks.named('preBuild') {
+    dependsOn copyWebBundle
+}

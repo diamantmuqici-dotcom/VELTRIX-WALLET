@@ -1,0 +1,12 @@
+{
+  "name": "veltrix-icon-renderer",
+  "private": true,
+  "type": "module",
+  "description": "Renders the legacy PNG launcher icons and the widget preview from SVG sources.",
+  "scripts": {
+    "render": "node render-icons.mjs"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "2.6.2"
+  }
+}

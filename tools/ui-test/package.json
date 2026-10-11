@@ -1,0 +1,14 @@
+{
+  "name": "veltrix-ui-tests",
+  "private": true,
+  "type": "module",
+  "description": "End-to-end UI tests for the VELTRIX Wallet production web bundle (the same bundle that ships in the APK).",
+  "scripts": {
+    "test": "node run.mjs",
+    "test:shots": "node run.mjs --screenshots"
+  },
+  "devDependencies": {
+    "@sparticuz/chromium": "153.0.0",
+    "puppeteer-core": "25.13.0"
+  }
+}

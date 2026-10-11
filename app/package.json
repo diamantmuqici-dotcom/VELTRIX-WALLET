@@ -1,0 +1,33 @@
+{
+  "name": "veltrix-wallet-ui",
+  "private": true,
+  "version": "1.0.0",
+  "description": "VELTRIX Wallet — UI layer of the fictional fintech simulator (bundled into the Android APK)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 5173",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4173 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "5.3.0",
+    "big.js": "7.0.1",
+    "lucide-react": "0.577.0",
+    "qrcode-generator": "2.0.4",
+    "react": "19.1.9",
+    "react-dom": "19.1.9"
+  },
+  "devDependencies": {
+    "@types/big.js": "7.0.0",
+    "@types/react": "19.1.17",
+    "@types/react-dom": "19.1.11",
+    "@vitejs/plugin-react": "4.7.0",
+    "fast-check": "4.10.2",
+    "typescript": "5.8.3",
+    "vite": "6.3.7",
+    "vitest": "3.2.7"
+  }
+}
