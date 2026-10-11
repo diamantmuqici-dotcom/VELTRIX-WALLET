@@ -1,0 +1,13 @@
+# Dependencies & build output
+node_modules/
+app/dist/
+android/build/
+tools/ui-test/node_modules/
+tools/ui-test/out/
+
+# Local toolchains and caches
+.cache/
+*.log
+.DS_Store
+
+# Keep the verified release APK (release/) — it is a deliverable.
