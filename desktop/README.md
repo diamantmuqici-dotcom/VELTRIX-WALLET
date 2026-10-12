@@ -53,7 +53,7 @@ says so in a dialog rather than failing silently.
 **The port is fixed on purpose.** The wallet keeps its ledger in
 `localStorage`, which the browser keys by origin. An ephemeral port would mean a
 different origin on every launch and a wallet that appeared to forget everything.
-A dedicated `--user-data-dir` keeps that profile — and therefore the simulated
+A dedicated `--user-data-dir` keeps that profile — and therefore the wallet
 data — out of the user's own browser profile.
 
 Flags: `--serve-only`, `--print-url`, `--port <n>`, `--version`, `--help`.
