@@ -19,18 +19,18 @@
 
 ## Download
 
+**[⬇ Get it from the latest release](https://github.com/diamantmuqici-dotcom/VELTRIX-WALLET/releases/latest)**: direct downloads, no account or build needed.
+
 | | |
 |---|---|
-| **APK** | [`release/VELTRIX-Wallet-v1.0.0.apk`](release/VELTRIX-Wallet-v1.0.0.apk) (≈ 445 KB) |
-| Checksum | [`release/VELTRIX-Wallet-v1.0.0.apk.sha256`](release/VELTRIX-Wallet-v1.0.0.apk.sha256) |
-| **Windows .exe** | [`release/VELTRIX-Wallet-v1.0.0-win-x64.exe`](release/VELTRIX-Wallet-v1.0.0-win-x64.exe) (≈ 1.4 MB) |
-| Checksum | [`release/VELTRIX-Wallet-v1.0.0-win-x64.exe.sha256`](release/VELTRIX-Wallet-v1.0.0-win-x64.exe.sha256) |
+| **Android APK** | [VELTRIX-Wallet-v1.0.0.apk](https://github.com/diamantmuqici-dotcom/VELTRIX-WALLET/releases/download/v1.0.0/VELTRIX-Wallet-v1.0.0.apk) (≈ 439 KB) · [SHA-256](https://github.com/diamantmuqici-dotcom/VELTRIX-WALLET/releases/download/v1.0.0/VELTRIX-Wallet-v1.0.0.apk.sha256) |
+| **Windows .exe** | [VELTRIX-Wallet-v1.0.0-win-x64.exe](https://github.com/diamantmuqici-dotcom/VELTRIX-WALLET/releases/download/v1.0.0/VELTRIX-Wallet-v1.0.0-win-x64.exe) (≈ 1.4 MB) · [SHA-256](https://github.com/diamantmuqici-dotcom/VELTRIX-WALLET/releases/download/v1.0.0/VELTRIX-Wallet-v1.0.0-win-x64.exe.sha256) |
 | App ID / version | `com.veltrix.wallet` · 1.0.0 (versionCode 1) |
 | Android | 7.0+ (API 24), target API 35 · needs an up-to-date Android System WebView (Chrome 87+) |
 | Windows | 10/11 x64 · needs Microsoft Edge or Google Chrome · no installer, single file, nothing to uninstall |
 | Signature | APK Signature Scheme v2 + v3, public **development** key ([details](android/keystore/README.md)). The .exe is **unsigned** — see [desktop/README.md](desktop/README.md). |
 
-Install the APK with `adb install release/VELTRIX-Wallet-v1.0.0.apk`, or copy the file to a phone and open it (allow installing from that source). On Windows, double-click the `.exe`; the whole UI is inside it, so it is served from `127.0.0.1` and opens in an Edge/Chrome app window.
+On a phone, open the APK link, then open the downloaded file and allow installing from that source (or run `adb install VELTRIX-Wallet-v1.0.0.apk` from a computer). On Windows, double-click the `.exe`. SmartScreen warns on first run because it is unsigned (**More info → Run anyway**). The whole UI is inside the file, served from `127.0.0.1` and opened in an Edge/Chrome app window. Step-by-step instructions are in the [release notes](docs/releases/v1.0.0.md). The same files are also committed in [`release/`](release/).
 
 Both artifacts were built and **verified** in this repository's environment. The APK statically (signature, zip alignment, manifest, resources, dex); the .exe statically (PE32+ x64, GUI subsystem, embedded bundle) *and* functionally — the same source compiled for the host passed 27 HTTP/security checks and the full 19-test end-to-end suite. Neither has been launched on real Windows or a real phone here; see [Environment limitations](#environment-limitations).
 
@@ -86,6 +86,8 @@ cd tools/ui-test && npm ci && npm test          # or: npm run test:shots (refres
 
 To sign with your own key: `VELTRIX_KEYSTORE=… VELTRIX_KEY_ALIAS=… VELTRIX_STORE_PASS=… VELTRIX_KEY_PASS=… tools/build-apk.sh`.
 
+**Publishing a release:** pushing a version tag runs [`.github/workflows/release.yml`](.github/workflows/release.yml), which attaches the APK, the `.exe` and their checksums to a GitHub Release. Bump the version first (`git grep -n 1.0.0` lists every place it appears, including `VERSION_CODE` in `tools/build-apk.sh`), rebuild with the two scripts above, commit `release/` (optionally with notes in `docs/releases/vX.Y.Z.md`), then run `git tag vX.Y.Z && git push origin vX.Y.Z`. The workflow publishes the committed files exactly as they are. It refuses to publish if they are missing at the tag or don't match their `.sha256`. A tag like `v1.1.0-beta.1` becomes a pre-release.
+
 **Why not Electron?** Electron would need its ~100 MB runtime downloaded from GitHub's release CDN, which is unreachable from a locked-down build sandbox, and it would add a second browser engine to audit. The Zig launcher instead compiles the UI *into* the executable (1.4 MB total) and draws it with the Edge/Chrome the machine already has. See [desktop/README.md](desktop/README.md).
 
 ## Project structure
@@ -112,8 +114,10 @@ tools/
   ui-test/               Puppeteer end-to-end tests (own package.json)
   icons/                 renders legacy PNG icons + widget preview from SVG
 release/                 the verified APK, the Windows .exe and their SHA-256s
-docs/                    architecture, testing, screenshots
-.github/workflows/ci.yml unit tests, reference APK build, UI tests, Gradle build
+docs/                    architecture, testing, screenshots, release notes (docs/releases/)
+.github/workflows/
+  ci.yml                 unit tests, reference APK build, Windows .exe build, UI tests, Gradle build
+  release.yml            on a vX.Y.Z tag: publish release/ as a GitHub Release (APK, .exe, checksums)
 ```
 
 ## Dependencies
