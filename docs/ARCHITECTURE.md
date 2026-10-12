@@ -98,7 +98,37 @@ so it is deterministic in tests (fixed clock and ids), atomic (a new state objec
 - **Widget:** `CardWidgetProvider` renders the default demo card into a bitmap (gradient, DEMO CARD pill, masked balance unless the user opts in, display digits, frozen state). `updatePeriodMillis=0` and the receiver isn't exported; the app pushes a snapshot when the card or balance changes. No background work.
 - **Themes and splash:** light theme in `values/`, dark in `values-night/` (so the WebView's `prefers-color-scheme` follows the system), API 31 splash attributes, and an adaptive icon with a monochrome layer plus legacy PNGs.
 
+## Desktop shell (`desktop/`)
+
+A Windows launcher that reuses the same bundle and the same browser fallbacks in
+`app/src/platform/bridge.ts` — with no `window.VeltrixNative` present, storage,
+haptics, sharing and theming already fall back to web implementations, which is
+what makes this a ~430-line file rather than a second port.
+
+- **One file, no dependencies.** `desktop/src/main.zig`, Zig standard library
+  only. The bundle is compiled in with `@embedFile`; the launcher never reads
+  from disk at request time, so a request path cannot escape into the filesystem.
+- **Fixed loopback port.** It binds `127.0.0.1:43921` and never `INADDR_ANY`. The
+  port is fixed rather than ephemeral because `localStorage` is keyed by origin:
+  a random port would give the wallet a new, empty origin on every launch.
+- **Single instance.** If the port is held, `GET /__veltrix/ping` decides between
+  "another VELTRIX" (open a second window onto it and exit) and "something else"
+  (try the next few ports). `SO_REUSEADDR` is set by hand and `SO_REUSEPORT` is
+  deliberately not: `net.Address.listen`'s `reuse_address` sets both, and
+  `SO_REUSEPORT` would let two live launchers share the port and defeat this.
+- **Window.** `msedge.exe`/`chrome.exe --app=<url> --window-size=420,880
+  --user-data-dir=%LocalAppData%\VELTRIX Wallet\profile`, then the launcher
+  blocks on that child and exits when the window closes. A dedicated profile
+  keeps simulated data out of the user's own browser profile.
+- **Serving.** One thread per connection, `Connection: close`, correct MIME
+  types, hashed assets immutable-cached, `index.html` not cached, `nosniff`, SPA
+  fallback for extension-less paths, 400 on traversal or NUL, 405 on non-GET.
+- **Errors.** A GUI-subsystem PE has no console, so fatal errors go to a
+  `MessageBoxW` dialog as well as stderr.
+
 ## Build pipeline
+
+
 
 `tools/build-apk.sh`:
 
@@ -112,3 +142,13 @@ so it is deterministic in tests (fixed clock and ids), atomic (a new state objec
 8. `apksigner` (v2 + v3).
 9. Verify: signature, alignment, badging, stored `resources.arsc` and dex header.
 10. Copy the APK to `release/` with a SHA-256.
+
+`tools/build-exe.sh`:
+
+1. Vite build (the same `app/dist` the APK embeds).
+2. `tools/gen-win-assets.py`: every file in `app/dist` → an `@embedFile` entry in a generated `assets.zig`, alongside a copy in `build/www`.
+3. `tools/render-win-icon.py`: the largest Android launcher PNG → a multi-resolution `.ico`; `zig rc` compiles it to `app.res`.
+4. `zig build-exe -target x86_64-windows -O ReleaseSafe --subsystem windows`, linking `app.res`.
+5. Static verification of the PE image (arch, GUI subsystem, embedded bundle).
+6. Functional verification: the *same source file* is rebuilt for the host and probed over HTTP (27 checks).
+7. Copy the `.exe` to `release/` with a SHA-256.

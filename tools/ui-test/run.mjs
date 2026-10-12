@@ -26,6 +26,10 @@ const OUT = resolve(here, 'out');
 const SHOTS = resolve(here, '../../docs/screenshots');
 const WANT_SHOTS = process.argv.includes('--screenshots');
 const ONLY = process.argv.find((a) => a.startsWith('--only='))?.slice(7);
+// Drive an already-running server instead of the built-in static one — used to
+// exercise the bundle as served by the desktop launcher (tools/build-exe.sh),
+// which is byte-for-byte the same bundle but reached over a different origin.
+const BASE_URL = process.argv.find((a) => a.startsWith('--base-url='))?.slice(11);
 
 /* ------------------------------ Static server ------------------------------ */
 
@@ -723,8 +727,8 @@ async function main() {
   }
   await mkdir(OUT, { recursive: true });
   if (WANT_SHOTS) await mkdir(SHOTS, { recursive: true });
-  const server = await serve();
-  const base = `http://127.0.0.1:${server.address().port}/`;
+  const server = BASE_URL ? null : await serve();
+  const base = BASE_URL ?? `http://127.0.0.1:${server.address().port}/`;
   const browser = await launch();
   console.log(`VELTRIX UI tests · ${await browser.version()} · ${base}\n`);
   for (const t of tests) {
@@ -755,7 +759,7 @@ async function main() {
   results.push({ name: 'no console errors or CSP violations in any flow', ok: cspOrConsole.length === 0, ms: 0, error: cspOrConsole.join('\n') || undefined });
   console.log(cspOrConsole.length ? `  ✗ console errors:\n${cspOrConsole.join('\n')}` : '  ✓ no console errors or CSP violations in any flow');
   await browser.close();
-  server.close();
+  server?.close();
   const passed = results.filter((r) => r.ok).length;
   await writeFile(join(OUT, 'results.json'), JSON.stringify({ date: new Date().toISOString(), passed, total: results.length, results }, null, 2));
   console.log(`\n${passed}/${results.length} passed`);

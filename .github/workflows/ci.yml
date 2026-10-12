@@ -56,6 +56,49 @@ jobs:
             release/VELTRIX-Wallet-v1.0.0.apk
             release/VELTRIX-Wallet-v1.0.0.apk.sha256
 
+  exe:
+    name: Windows .exe (Zig cross-compile)
+    needs: unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            app/package-lock.json
+            tools/ui-test/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install "ziglang==0.14.1" pillow
+      # The ziglang wheel does not always install a console script.
+      - name: Locate the compiler
+        run: echo "VELTRIX_ZIG=$(python -c 'import os, ziglang; print(os.path.join(os.path.dirname(ziglang.__file__), "zig"))')" >> "$GITHUB_ENV"
+      # build-exe.sh cross-compiles the PE image, statically verifies it and runs
+      # 27 functional checks against the same source built for the runner.
+      - run: bash tools/build-exe.sh
+        env:
+          SKIP_TESTS: '1'
+      - run: npm ci --no-audit --no-fund
+        working-directory: tools/ui-test
+      # Re-run the whole end-to-end suite against the bundle as the launcher
+      # serves it, not against app/dist on disk.
+      - name: End-to-end tests against the launcher
+        working-directory: tools/ui-test
+        run: |
+          ../../desktop/build/launcher-host --print-url > /tmp/veltrix-url &
+          for _ in $(seq 1 100); do URL="$(head -n1 /tmp/veltrix-url 2>/dev/null)"; [ -n "$URL" ] && break; sleep 0.1; done
+          [ -n "$URL" ] || { echo "launcher did not start"; exit 1; }
+          node run.mjs --base-url="$URL"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VELTRIX-Wallet-windows-exe
+          path: |
+            release/VELTRIX-Wallet-v1.0.0-win-x64.exe
+            release/VELTRIX-Wallet-v1.0.0-win-x64.exe.sha256
+
   ui:
     name: End-to-end UI tests
     needs: unit

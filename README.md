@@ -23,13 +23,16 @@
 |---|---|
 | **APK** | [`release/VELTRIX-Wallet-v1.0.0.apk`](release/VELTRIX-Wallet-v1.0.0.apk) (≈ 445 KB) |
 | Checksum | [`release/VELTRIX-Wallet-v1.0.0.apk.sha256`](release/VELTRIX-Wallet-v1.0.0.apk.sha256) |
+| **Windows .exe** | [`release/VELTRIX-Wallet-v1.0.0-win-x64.exe`](release/VELTRIX-Wallet-v1.0.0-win-x64.exe) (≈ 1.4 MB) |
+| Checksum | [`release/VELTRIX-Wallet-v1.0.0-win-x64.exe.sha256`](release/VELTRIX-Wallet-v1.0.0-win-x64.exe.sha256) |
 | App ID / version | `com.veltrix.wallet` · 1.0.0 (versionCode 1) |
 | Android | 7.0+ (API 24), target API 35 · needs an up-to-date Android System WebView (Chrome 87+) |
-| Signature | APK Signature Scheme v2 + v3, public **development** key ([details](android/keystore/README.md)) |
+| Windows | 10/11 x64 · needs Microsoft Edge or Google Chrome · no installer, single file, nothing to uninstall |
+| Signature | APK Signature Scheme v2 + v3, public **development** key ([details](android/keystore/README.md)). The .exe is **unsigned** — see [desktop/README.md](desktop/README.md). |
 
-Install with `adb install release/VELTRIX-Wallet-v1.0.0.apk`, or copy the file to a phone and open it (allow installing from that source).
+Install the APK with `adb install release/VELTRIX-Wallet-v1.0.0.apk`, or copy the file to a phone and open it (allow installing from that source). On Windows, double-click the `.exe`; the whole UI is inside it, so it is served from `127.0.0.1` and opens in an Edge/Chrome app window.
 
-The APK was built and **statically verified** in this repository's environment (signature, zip alignment, manifest, resources, dex). No emulator was available here, so it has not been run on a device yet — see [Environment limitations](#environment-limitations).
+Both artifacts were built and **verified** in this repository's environment. The APK statically (signature, zip alignment, manifest, resources, dex); the .exe statically (PE32+ x64, GUI subsystem, embedded bundle) *and* functionally — the same source compiled for the host passed 27 HTTP/security checks and the full 19-test end-to-end suite. Neither has been launched on real Windows or a real phone here; see [Environment limitations](#environment-limitations).
 
 ## What's inside
 
@@ -70,13 +73,20 @@ cd ..
 tools/setup-toolchain.sh   # fetches JDK 17 + Android API 35 build tools from public AOSP mirrors on GitHub
 tools/build-apk.sh         # tests → bundle → compile → dex → align → sign → verify → release/
 
-# 3) End-to-end UI tests against the production bundle
+# 3) Windows .exe (Zig cross-compiles it on Linux — no Windows host, no installer toolchain)
+cd ..
+tools/setup-exe-toolchain.sh   # ziglang + Pillow from PyPI
+tools/build-exe.sh             # tests → bundle → embed → cross-compile → icon → verify → release/
+
+# 4) End-to-end UI tests against the production bundle
 cd tools/ui-test && npm ci && npm test          # or: npm run test:shots (refreshes docs/screenshots)
 ```
 
 **Android Studio / Gradle:** `android/` is also a standard Gradle project (AGP 8.7.3, Gradle 8.10.2 wrapper, JDK 17). Build the web bundle first (`cd app && npm ci && npm run build`), then open `android/` in Android Studio or run `./gradlew assembleDebug`. Gradle could not be executed in the environment this was developed in (Maven/Google repositories are blocked there); the GitHub Actions workflow runs it on every push, and the [first run](https://github.com/diamantmuqici-dotcom/VELTRIX-WALLET/actions/runs/38177537425) built the debug APK successfully.
 
 To sign with your own key: `VELTRIX_KEYSTORE=… VELTRIX_KEY_ALIAS=… VELTRIX_STORE_PASS=… VELTRIX_KEY_PASS=… tools/build-apk.sh`.
+
+**Why not Electron?** Electron would need its ~100 MB runtime downloaded from GitHub's release CDN, which is unreachable from a locked-down build sandbox, and it would add a second browser engine to audit. The Zig launcher instead compiles the UI *into* the executable (1.4 MB total) and draws it with the Edge/Chrome the machine already has. See [desktop/README.md](desktop/README.md).
 
 ## Project structure
 
@@ -91,12 +101,17 @@ android/                 native Android shell (Java, platform APIs only — no A
   app/src/main/java/…    MainActivity (WebView host), WebAppBridge, AssetServer, CardWidgetProvider
   app/src/main/res/      themes (light/dark, splash), adaptive icon, widget, backup rules
   keystore/              public development signing key
+desktop/                 Windows desktop shell (Zig): embeds app/dist, serves it on 127.0.0.1, opens an app window
 tools/
   setup-toolchain.sh     fetch the minimal Android toolchain
   build-apk.sh           Gradle-free build + verification
+  setup-exe-toolchain.sh fetch ziglang + Pillow
+  build-exe.sh           cross-compile + verify the Windows .exe
+  gen-win-assets.py      app/dist → the @embedFile table compiled into the .exe
+  render-win-icon.py     Android launcher PNGs → multi-resolution .ico
   ui-test/               Puppeteer end-to-end tests (own package.json)
   icons/                 renders legacy PNG icons + widget preview from SVG
-release/                 the verified APK and its SHA-256
+release/                 the verified APK, the Windows .exe and their SHA-256s
 docs/                    architecture, testing, screenshots
 .github/workflows/ci.yml unit tests, reference APK build, UI tests, Gradle build
 ```
@@ -118,6 +133,8 @@ docs/                    architecture, testing, screenshots
 
 The Android shell uses only Android platform APIs (no third-party Java libraries). Toolchain: OpenJDK 17.0.2, android.jar API 35, aapt2 2.19, D8 8.6.2, apksigner 0.9.
 
+The desktop launcher is a single Zig file with **no third-party dependencies** — only the Zig standard library. Toolchain: Zig 0.14.1 (`ziglang` from PyPI), Pillow for the `.ico`.
+
 ## Test results
 
 Latest run (2026-10-11):
@@ -125,6 +142,8 @@ Latest run (2026-10-11):
 - **Unit & property tests:** 114 / 114 passed across 10 files: money parsing and formatting, payments, credit, cards, contacts, FX, markets and portfolio maths, presets, analytics, search and filters, CSV, backup/schema validation, planning, calculator. Property tests run random sequences of up to 40 operations through the ledger (300 runs) and check that balances always equal the sum of ledger effects, asset accounts never go negative, credit stays within its limit and transfers conserve value.
 - **End-to-end UI tests:** 19 / 19 passed against the production bundle with its CSP: setup wizard, send/refund/request/receive, balance edits, card studio, exchange, markets, ledger search/sort, CSV and backup round-trip, persistence and corruption recovery, back navigation, theming, the native-bridge contract, a 20,000-entry history (validate ≈ 0.1 s, apply ≈ 0.4 s, Activity ≈ 0.5 s), accessibility smoke checks and zero console errors or CSP violations.
 - **APK verification:** apksigner verify (v2 + v3), `zipalign -c -p 4`, `aapt2 dump badging` (package, SDK levels, single permission, launcher activity, widget), uncompressed `resources.arsc`, dex header check.
+- **Windows .exe verification:** static PE checks (PE32+ x64, GUI subsystem so no console window appears, the embedded bundle present verbatim) plus **27 functional checks** run against the same source compiled for the host: every asset served byte-identically to `app/dist`, correct MIME types, hashed assets immutable-cached while `index.html` is not, `nosniff`, SPA route fallback, 404/400/405 handling, path-traversal and null-byte rejection, a single loopback-only listener (asserted from the kernel's view of the process's own sockets) and single-instance deferral.
+- **End-to-end suite against the launcher:** all **19 / 19** UI tests re-run against the bundle *as served by the launcher* (`node run.mjs --base-url=…`), with zero console errors or CSP violations — so the bytes compiled into the `.exe` are the bytes that pass the full flow suite, not merely a copy of `app/dist` on disk.
 - **CI on a clean GitHub runner** ([run](https://github.com/diamantmuqici-dotcom/VELTRIX-WALLET/actions/runs/38177537425)): unit tests, the toolchain APK build from scratch, the end-to-end UI tests and the Gradle build all passed.
 
 Details: [docs/TESTING.md](docs/TESTING.md) · Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
@@ -137,7 +156,9 @@ This project was built in a sandbox with no Android emulator (no KVM) and with G
 2. **Framework choice.** Kotlin + Jetpack Compose (and Flutter or React Native) need Gradle and Maven artifacts that could not be downloaded here, so the app uses a native Java shell with a React UI in a WebView, built with the Android SDK's own tools. This is the one framework in the repository; there are no parallel half-built implementations.
 3. **The Gradle build was not executed locally** (Maven blocked). It runs in CI, where it [passes](https://github.com/diamantmuqici-dotcom/VELTRIX-WALLET/actions/runs/38177537425); the resulting artifact could not be downloaded into this sandbox for inspection.
 4. **Live indicative FX rates could not be fetched from this sandbox** (outbound host blocked). The parsing, validation, staleness and disclosure logic is unit-tested with sample payloads; the app falls back to labelled demo rates.
-5. **No Google/Apple Wallet provisioning** — it is not possible for fictional cards and is not claimed. The home-screen widget and in-app presentation mode are the alternatives.
+5. **The `.exe` has never been executed on Windows.** No Windows host or emulator was available, and GitHub's release CDN — which is where an Electron runtime would have to come from — is blocked here, so the launcher is cross-compiled with Zig and verified two ways: statically as a PE image, and functionally by compiling the *same source file* for the host and driving it over HTTP (27 checks) and through the full 19-test end-to-end suite. What is untested is Windows-specific and small: the `MessageBoxW` error dialog, browser discovery under real `Program Files` paths, `--app` window framing, and SmartScreen's reaction to an unsigned binary. See the checklist in [docs/TESTING.md](docs/TESTING.md).
+6. **The `.exe` is unsigned.** There is no code-signing certificate here, so SmartScreen will warn on first run. Details and options: [desktop/README.md](desktop/README.md).
+7. **No Google/Apple Wallet provisioning** — it is not possible for fictional cards and is not claimed. The home-screen widget and in-app presentation mode are the alternatives.
 
 ## Trademarks
 
