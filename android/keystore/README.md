@@ -1,7 +1,7 @@
 # Development signing key
 
 `veltrix-dev.jks` is a **public, development-only** key used to sign the
-VELTRIX Wallet simulator APK so it can be installed for testing.
+VELTRIX Wallet APK so it can be installed for testing.
 
 - Store type: PKCS12 · alias `veltrix` · store/key password `veltrix-dev`
 - Anyone can sign an APK with this key. Do **not** use it for a store listing
